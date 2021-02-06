@@ -15,17 +15,17 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64"
   config.vm.box_version = "20210203.0.0"
 
-  config.vm.network "forwarded_port", guest: 27017, host: 27017
+  #config.vm.network "forwarded_port", guest: 27017, host: 27017
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
   # via 127.0.0.1 to disable public access
-  # config.vm.network "forwarded_port", guest: 27017, host: 27017, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 27017, host: 27017, host_ip: "127.0.0.1"
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  config.vm.network "private_network", ip: "192.168.33.10"
-  config.vm.hostname = "my.mongodb.ep"
+  #config.vm.network "private_network", ip: "192.168.33.10"
+  #config.vm.hostname = "my.mongodb.ep"
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
@@ -51,8 +51,27 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
+  config.vm.provision "shell", inline: <<-SHELL
+    # add mongodb gpg key
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+    # add MongoDB repo
+    sudo add-apt-repository 'deb [arch=amd64] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse'
+    # update package list and install mongo
+    sudo apt-get update
+    sudo apt-get install -y mongodb-org
+
+    sudo systemctl start mongod
+    sudo systemctl enable mongod
+    sudo systemctl status mongod
+
+    # *******************  FOLDERS FOR MONGODB ***************************
+    # ********************************************************************
+    # By default and from using the above method,
+    # data files will be in /var/lib/mongodb
+    # log files will be in /var/log/mongodb
+    # unless specified in systemLog.path and storage.dbPath
+    # of the /etc/mongod.conf file
+    # ******************  END OF FOLDER SETUP  **************************
+    # *******************************************************************
+  SHELL
 end
