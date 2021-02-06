@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "private_network", ip: "192.168.33.10"
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
@@ -41,6 +41,7 @@ Vagrant.configure("2") do |config|
     vb.gui = false
   # Customize the amount of memory on the VM:
     vb.memory = "2048"
+    vb.cpus = "2"
   end
   #
   # View the documentation for the provider you are using for more
