@@ -15,12 +15,12 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64"
   config.vm.box_version = "20210203.0.0"
 
-  #config.vm.network "forwarded_port", guest: 27017, host: 27017
+  config.vm.network "forwarded_port", guest: 27017, host: 27017
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
   # via 127.0.0.1 to disable public access
-  config.vm.network "forwarded_port", guest: 27017, host: 27017, host_ip: "127.0.0.1"
+  #config.vm.network "forwarded_port", guest: 27017, host: 27017, host_ip: "127.0.0.1"
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
+  config.vm.synced_folder ".", "/vagrant"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -43,6 +43,7 @@ Vagrant.configure("2") do |config|
   # Customize the amount of memory on the VM:
     vb.memory = "2048"
     vb.cpus = "2"
+    vb.name = "single-mongo"
   end
   #
   # View the documentation for the provider you are using for more
@@ -60,10 +61,6 @@ Vagrant.configure("2") do |config|
     sudo apt-get update
     sudo apt-get install -y mongodb-org
 
-    sudo systemctl start mongod
-    sudo systemctl enable mongod
-    sudo systemctl status mongod
-
     # *******************  FOLDERS FOR MONGODB ***************************
     # ********************************************************************
     # By default and from using the above method,
@@ -73,5 +70,34 @@ Vagrant.configure("2") do |config|
     # of the /etc/mongod.conf file
     # ******************  END OF FOLDER SETUP  **************************
     # *******************************************************************
+
+    echo "    CHANGING MONGODB CONFIG    "
+    sudo rm -f /etc/mongod.conf
+    sleep 2
+    sudo cp ../../vagrant/vagBuild/pri-mongodb.conf /etc/mongod.conf
+    sudo chmod 644 /etc/mongod.conf
+
+    echo "    STARTING MONGODB     "
+    sudo systemctl start mongod
+    sudo systemctl status mongod
+    sudo systemctl enable mongod
+
+    #echo "      TESTING CONNECTION       "
+    #mongo --eval "db.runCommand({ connectionStatus: 1 })"
+
+    sleep 2
+
+    echo "    MODIFY mongod.conf for security turned on     "
+    sudo tee -a /etc/mongod.conf > /dev/null <<EOT
+security:
+  authorization: enabled
+EOT
+
+    echo "    CREATE MongoDB Root User and User Admin    "
+    mongo --eval "db = db.getSiblingDB('admin');db.createUser( { user: 'mongo_rootUser', pwd: 'password', roles: [ { role: 'root', db: 'admin' } ] } );"
+
+     echo "      RESTARTING MONGOD        "
+    sudo systemctl restart mongod
+
   SHELL
 end
