@@ -8,6 +8,8 @@ Energetic Pixels' Single Instance MongoDB
 * VM can be IP accessed at 192.168.33.10.
 * MongoDB instance version 4.x.
   * User Admin profile (username and password) hardcoded.
+  * User DB user profile (username and password) to project db hardcoded
+  * with readWrite role.
   * Listening on port 27017.
 
 ```

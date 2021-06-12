@@ -52,17 +52,28 @@ Vagrant.configure("2") do |config|
           }
         ]
       }
+    );db.createUser(
+      {
+        user: 'user_db',
+        pwd: 'password1',
+        roles: [
+          {
+            role: 'readWrite',
+            db: 'project'
+          }
+        ]
+      }
     );"
 
     echo "    MODIFY mongod.conf for security turned on     "
     sudo sh -c 'echo "\nsecurity: \n  authorization: enabled" >> /etc/mongod.conf'
 
-    
-
      echo "      RESTARTING MONGOD        "
     sudo systemctl restart mongod
-    sudo systemctl status mongod
 
+    sleep 2
+
+    sudo systemctl status mongod
     sudo systemctl enable mongod
 
   SHELL
