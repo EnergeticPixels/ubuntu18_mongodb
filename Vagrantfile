@@ -2,8 +2,10 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/bionic64"
-  config.vm.box_version = "20210526.0.0"
+  config.vm.box = "ubuntu/focal64"
+  #config.vm.box = "bento/ubuntu-20.10"
+  #config.vm.box = "generic/ubuntu2010"
+  #config.vm.box_version = "20210526.0.0"
 
   config.vm.network "forwarded_port", guest: 27017, host: 27017
 
@@ -38,22 +40,24 @@ Vagrant.configure("2") do |config|
 
     sleep 2
 
-    echo "    MODIFY mongod.conf for security turned on     "
-    sudo sh -c 'echo "\nsecurity: \n  authorization: enabled" >> /etc/mongod.conf'
-
     echo "    CREATE MongoDB Root User and User Admin    "
     mongo --eval "db=db.getSiblingDB('admin');db.createUser(
       {
-        user: 'pers_admin', 
-        pwd: 'password', 
+        user: 'user_minister',
+        pwd: 'password',
         roles: [
           {
-            role: 'userAdmin', 
+            role: 'userAdminAnyDatabase',
             db: 'admin'
           }
         ]
       }
     );"
+
+    echo "    MODIFY mongod.conf for security turned on     "
+    sudo sh -c 'echo "\nsecurity: \n  authorization: enabled" >> /etc/mongod.conf'
+
+    
 
      echo "      RESTARTING MONGOD        "
     sudo systemctl restart mongod
